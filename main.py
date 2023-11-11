@@ -52,7 +52,7 @@ def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_
         # Every data instance is an input + label pair
         inputs, labels = data
         # print(inputs)
-        # fix acc. to https://stackoverflow.com/questions/69742930/runtimeerror-nll-loss-forward-reduce-cuda-kernel-2d-index-not-implemented-for
+        # fix (this was only needed locally, on cluster it worked) acc. to https://stackoverflow.com/questions/69742930/runtimeerror-nll-loss-forward-reduce-cuda-kernel-2d-index-not-implemented-for
         labels = labels.type(torch.LongTensor)
         labels = labels.to(my_device)
 
@@ -64,7 +64,8 @@ def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_
         outputs = model(inputs)
 
         # Compute the loss and its gradients
-        # print(outputs)
+        print(labels)
+        print(outputs)
         loss = loss_fn(outputs, labels)
         print(loss)
         loss.backward()
@@ -97,7 +98,7 @@ X = np.array([[1,1,1,0,0,0,0,0,0],
 #      [0,0,0,0,0,0,1,1,1]]
 # image = np.array([[255, 255, 0, 0, 0, 255, 255, 255, 255]], dtype=np.uint8)
 
-y = np.array([1, 2, 3])
+y = np.array([0, 1, 2])
 
 # wir haben ein map-style dataset... 
 dataset_train = customTensorDataset(X, y, my_device)
@@ -163,7 +164,12 @@ for epoch in range(EPOCHS):
     with torch.no_grad():
         for i, vdata in enumerate(validation_loader):
             vinputs, vlabels = vdata
+            # fix (this was only needed locally, on cluster it worked) acc. to https://stackoverflow.com/questions/69742930/runtimeerror-nll-loss-forward-reduce-cuda-kernel-2d-index-not-implemented-for
+            vlabels = vlabels.type(torch.LongTensor)
+            vlabels = vlabels.to(my_device)
+            
             voutputs = oneLayerModel(vinputs)
+            print(vinputs)
             vloss = loss_fn(voutputs, vlabels)
             running_vloss += vloss
             
