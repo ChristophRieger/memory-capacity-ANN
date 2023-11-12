@@ -10,6 +10,7 @@ from torch.utils.data import Dataset, DataLoader, TensorDataset
 from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
 import numpy as np
+import random
 
 # class to build a dataset
 class customTensorDataset(Dataset):
@@ -65,7 +66,7 @@ def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_
         outputs = model(inputs)
 
         # Compute the loss and its gradients
-        # !!! TODO output has the wrong size
+        # output has size of (nOutput, batchSize)
         # print("output: ")
         # print(outputs)
         loss = loss_fn(outputs, labels)
@@ -85,20 +86,35 @@ def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_
 
     return last_loss
 
+def create_dataset(N, sparsity, size):
+  X = np.zeros((size, N))
+  y = np.zeros((size, N))
+  bits = list(range(0, N))
+  active_bits = int(N * sparsity)
+  for i in range(size):
+    X_choices = random.sample(bits, active_bits)
+    X[i, X_choices] = 1 
+    y_choices = random.sample(bits, active_bits)
+    y[i, y_choices] = 1
+    
+  return X, y
+
+# START
+
 if torch.cuda.is_available():
     my_device = torch.device('cuda')
 else:
     my_device = torch.device('cpu')
 print('Device: {}'.format(my_device))
 
-X = np.array([[1,1,1,0,0,0,0,0,0],
-     [0,0,0,1,1,1,0,0,0],
-     [0,0,0,0,0,0,1,1,1]], dtype='float32')
-N = 1000
-X = X.repeat(N, axis=0)
-y = np.array([0, 1, 2])
-y = y.repeat(N, axis=0)
+N = 100
+sparsity = 0.1 # fraction of active bits in data
+dataset_size = 10000
 
+X, y = create_dataset(N, sparsity, dataset_size) 
+
+# I set train and validation dataset equal, as I need the same random data to
+# check if a pattern was memorized
 dataset_train = customTensorDataset(X, y, my_device)
 dataset_validation = customTensorDataset(X, y, my_device)
 train_loader = DataLoader(dataset=dataset_train, batch_size=3, shuffle=True)
@@ -111,7 +127,7 @@ validation_loader = DataLoader(dataset=dataset_validation, batch_size=3, shuffle
   # access label
   # print(data[1][0])
     
-oneLayerModel = OneLayerModel(9, 3, my_device)
+oneLayerModel = OneLayerModel(10, 10, my_device)
 # print('The model:')
 # print(oneLayerModel)
 # print('The parameters:')
