@@ -28,17 +28,20 @@ class OneLayerModel(torch.nn.Module):
 
   def __init__(self, inputSize, outputSize, my_device):
       super(OneLayerModel, self).__init__()
-
-      self.linear1 = torch.nn.Linear(inputSize, outputSize)
+      # self.inputLayer = torch.nn.Linear(inputSize, inputSize)
+      self.fullyConnectedLayer = torch.nn.Linear(inputSize, outputSize)
       self.activation = torch.nn.Sigmoid()
+      self.softmax = torch.nn.Softmax()
+      # !!! This has to be called last, otherwise it doesn't move the parameters
+      # above to the device
       self.to(my_device) # move the model to the same device as tensors
-      # self.softmax = torch.nn.Softmax()
-      # nn.CrossEntropyLoss
 
   def forward(self, x):
-      x = self.linear1(x)
+      # x = self.inputLayer(x)
+      # x = self.activation(x)
+      x = self.fullyConnectedLayer(x)
       x = self.activation(x)
-      # x = self.softmax(x)
+      x = self.softmax(x)
       return x
 
 def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_device, tb_writer):
@@ -51,11 +54,9 @@ def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_
     for i, data in enumerate(training_loader):
         # Every data instance is an input + label pair
         inputs, labels = data
-        # print(inputs)
         # fix (this was only needed locally, on cluster it worked) acc. to https://stackoverflow.com/questions/69742930/runtimeerror-nll-loss-forward-reduce-cuda-kernel-2d-index-not-implemented-for
         labels = labels.type(torch.LongTensor)
         labels = labels.to(my_device)
-
         # Zero your gradients for every batch!
         optimizer.zero_grad()
 
@@ -64,10 +65,10 @@ def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_
         outputs = model(inputs)
 
         # Compute the loss and its gradients
-        print(labels)
-        print(outputs)
+        # !!! TODO output has the wrong size
+        # print("output: ")
+        # print(outputs)
         loss = loss_fn(outputs, labels)
-        print(loss)
         loss.backward()
 
         # Adjust learning weights
@@ -75,8 +76,8 @@ def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_
 
         # Gather data and report
         running_loss += loss.item()
-        if i % 1000 == 999:
-            last_loss = running_loss / 1000 # loss per batch
+        if i % 10 == 9:
+            last_loss = running_loss / 10 # loss per batch
             print('  batch {} loss: {}'.format(i + 1, last_loss))
             tb_x = epoch_index * len(training_loader) + i + 1
             tb_writer.add_scalar('Loss/train', last_loss, tb_x)
@@ -93,14 +94,11 @@ print('Device: {}'.format(my_device))
 X = np.array([[1,1,1,0,0,0,0,0,0],
      [0,0,0,1,1,1,0,0,0],
      [0,0,0,0,0,0,1,1,1]], dtype='float32')
-# X = [[1,1,1,0,0,0,0,0,0],
-#      [0,0,0,1,1,1,0,0,0],
-#      [0,0,0,0,0,0,1,1,1]]
-# image = np.array([[255, 255, 0, 0, 0, 255, 255, 255, 255]], dtype=np.uint8)
-
+N = 1000
+X = X.repeat(N, axis=0)
 y = np.array([0, 1, 2])
+y = y.repeat(N, axis=0)
 
-# wir haben ein map-style dataset... 
 dataset_train = customTensorDataset(X, y, my_device)
 dataset_validation = customTensorDataset(X, y, my_device)
 train_loader = DataLoader(dataset=dataset_train, batch_size=3, shuffle=True)
@@ -120,22 +118,10 @@ oneLayerModel = OneLayerModel(9, 3, my_device)
 # for param in oneLayerModel.parameters():
   # print(param)
   
-  
 # Optimizers specified in the torch.optim package
 optimizer = torch.optim.SGD(oneLayerModel.parameters(), lr=0.001, momentum=0.9)
-  
-  
-loss_fn = torch.nn.CrossEntropyLoss()
-# NB: Loss functions expect data in batches, so we're creating batches of 4
-# Represents the model's confidence in each of the 10 classes for a given input
-dummy_outputs = torch.rand(4, 10)
-# Represents the correct class among the 10 being tested
-dummy_labels = torch.tensor([1, 5, 3, 7])
-print(dummy_outputs)
-print(dummy_labels)
-loss = loss_fn(dummy_outputs, dummy_labels)
-print('Total loss for this batch: {}'.format(loss.item()))
 
+loss_fn = torch.nn.CrossEntropyLoss()
 
 # Initializing in a separate cell so we can easily add more epochs to the same run
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -152,13 +138,11 @@ for epoch in range(EPOCHS):
     # Make sure gradient tracking is on, and do a pass over the data
     oneLayerModel.train(True)
     avg_loss = train_one_epoch(epoch_number, train_loader, oneLayerModel, optimizer, loss_fn, my_device, writer)
-    print('after train one epoch')
 
     running_vloss = 0.0
     # Set the model to evaluation mode, disabling dropout and using population
     # statistics for batch normalization.
     oneLayerModel.eval()
-    print('after eval')
 
     # Disable gradient computation and reduce memory consumption.
     with torch.no_grad():
@@ -169,7 +153,6 @@ for epoch in range(EPOCHS):
             vlabels = vlabels.to(my_device)
             
             voutputs = oneLayerModel(vinputs)
-            print(vinputs)
             vloss = loss_fn(voutputs, vlabels)
             running_vloss += vloss
             
