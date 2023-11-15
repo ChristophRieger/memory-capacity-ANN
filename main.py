@@ -91,7 +91,10 @@ def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_
     return last_loss
 
 def create_dataset(N, sparsity, size):
+  print("Generating dataset...")
   # !!! TODO they can be no duplicates in either input or target!!!!!!!!!!
+  # ... I have an idea how to solve this, but it seems complicated...
+  # for now just checking if a vector already exists, and if it does randomly re-generate
   X = np.zeros((size, N), dtype='float32')
   y = np.zeros((size, N), dtype='float32')
   bits = list(range(0, N))
@@ -102,6 +105,7 @@ def create_dataset(N, sparsity, size):
     y_choices = random.sample(bits, active_bits)
     y[i, y_choices] = 1
     
+  print("Dataset generated!")
   return X, y
 
 # START
