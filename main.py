@@ -11,6 +11,8 @@ from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 import random
+import sys
+import math
 
 # class to build a dataset
 class customTensorDataset(Dataset):
@@ -92,18 +94,35 @@ def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_
 
 def create_dataset(N, sparsity, size):
   print("Generating dataset...")
-  # !!! TODO they can be no duplicates in either input or target!!!!!!!!!!
-  # ... I have an idea how to solve this, but it seems complicated...
-  # for now just checking if a vector already exists, and if it does randomly re-generate
   X = np.zeros((size, N), dtype='float32')
   y = np.zeros((size, N), dtype='float32')
   bits = list(range(0, N))
   active_bits = int(N * sparsity)
+  inactive_bits = int(N * (1 - sparsity))
+  
+  # check if size is bigger than the amount of possibilities
+  possible_permutations = math.factorial(N) / (math.factorial(active_bits) * math.factorial(inactive_bits))
+  if (size > possible_permutations):
+    sys.exit("The given size of " + str(size) + " is bigger than the amount of possible permutations of " + str(int(possible_permutations)))
+
   for i in range(size):
     X_choices = random.sample(bits, active_bits)
-    X[i, X_choices] = 1 
+    X_vector_to_check = np.zeros((1, N))
+    X_vector_to_check[0, X_choices] = 1 
+    while(any((X==X_vector_to_check).all(1))):
+      X_choices = random.sample(bits, active_bits)
+      X_vector_to_check = np.zeros((1, N))
+      X_vector_to_check[0, X_choices] = 1 
+    X[i, :] = X_vector_to_check
+      
     y_choices = random.sample(bits, active_bits)
-    y[i, y_choices] = 1
+    y_vector_to_check = np.zeros((1, N))
+    y_vector_to_check[0, y_choices] = 1 
+    while(any((y==y_vector_to_check).all(1))):
+      y_choices = random.sample(bits, active_bits)
+      y_vector_to_check = np.zeros((1, N))
+      y_vector_to_check[0, y_choices] = 1 
+    y[i, :] = y_vector_to_check
     
   print("Dataset generated!")
   return X, y
@@ -116,12 +135,14 @@ else:
     my_device = torch.device('cpu')
 print('Device: {}'.format(my_device))
 
-N = 10
+N = 100
 sparsity = 0.1 # fraction of active bits in data
-dataset_size = 1
+dataset_size = 1000
 my_batch_size = 1
 
 X, y = create_dataset(N, sparsity, dataset_size) 
+
+sys.exit()
 print("X")
 print(X)
 print("y")
