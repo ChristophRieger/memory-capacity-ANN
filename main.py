@@ -13,6 +13,7 @@ import numpy as np
 import random
 import sys
 import math
+import os
 
 # class to build a dataset
 class customTensorDataset(Dataset):
@@ -83,14 +84,15 @@ def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_
 
         # Gather data and report
         running_loss += loss.item()
-        if i % my_batch_size == my_batch_size - 1:
-            last_loss = running_loss / my_batch_size # loss per batch
-            # print('  batch {} loss: {}'.format(i + 1, last_loss))
-            tb_x = epoch_index * len(training_loader) + i + 1
-            tb_writer.add_scalar('Loss/train', last_loss, tb_x)
-            running_loss = 0.
-
-    return last_loss
+        # I commented code below out, as I do not need the loss within one epoch..
+        # if i % my_batch_size == my_batch_size - 1:
+        #     last_loss = running_loss / my_batch_size # loss per batch
+        #     # print('  batch {} loss: {}'.format(i + 1, last_loss))
+        #     tb_x = epoch_index * len(training_loader) + i + 1
+        #     tb_writer.add_scalar('Loss/train', last_loss, tb_x)
+        #     running_loss = 0.
+    last_loss = running_loss
+    return last_loss / len(training_loader)
 
 def create_dataset(N, sparsity, size):
   print("Generating dataset...")
@@ -129,6 +131,9 @@ def create_dataset(N, sparsity, size):
 
 # START
 
+# Command Center
+load_model = False
+
 if torch.cuda.is_available():
     my_device = torch.device('cuda')
 else:
@@ -138,15 +143,15 @@ print('Device: {}'.format(my_device))
 N = 100
 sparsity = 0.1 # fraction of active bits in data
 dataset_size = 1000
-my_batch_size = 1
+my_batch_size = 32
 
 X, y = create_dataset(N, sparsity, dataset_size) 
 
-sys.exit()
-print("X")
-print(X)
-print("y")
-print(y)
+# sys.exit()
+# print("X")
+# print(X)
+# print("y")
+# print(y)
 # I set train and validation dataset equal, as I need the same random data to
 # check if a pattern was memorized
 dataset_train = customTensorDataset(X, y, my_device)
@@ -160,8 +165,9 @@ validation_loader = DataLoader(dataset=dataset_validation, batch_size=3, shuffle
   # print(data[0][0][2])
   # access label
   # print(data[1][0])
-    
 oneLayerModel = OneLayerModel(N, N, my_device)
+if load_model:
+  oneLayerModel.load_state_dict(torch.load('path_to_model'))
 # print('The model:')
 # print(oneLayerModel)
 # print('The parameters initially:')
@@ -169,7 +175,7 @@ oneLayerModel = OneLayerModel(N, N, my_device)
 #   print(param)
 
 # Optimizers specified in the torch.optim package
-optimizer = torch.optim.SGD(oneLayerModel.parameters(), lr=0.001, momentum=0.9)
+optimizer = torch.optim.SGD(oneLayerModel.parameters(), lr=0.01, momentum=0.9)
 
 # it seems this is the wrong loss function, as it is not supposed to be used
 # for multiple binary classes
@@ -200,10 +206,11 @@ timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 writer = SummaryWriter('runs/fashion_trainer_{}'.format(timestamp))
 epoch_number = 0
 
-EPOCHS = 500
+EPOCHS = 1
 
 best_vloss = 1_000_000.
-
+if not os.path.exists('modelStates'):
+  os.mkdir('modelStates')
 for epoch in range(EPOCHS):
     # print('EPOCH {}:'.format(epoch_number + 1))
 
@@ -242,10 +249,10 @@ for epoch in range(EPOCHS):
     # Track best performance, and save the model's state
     if avg_vloss < best_vloss:
         best_vloss = avg_vloss
-        model_path = 'model_{}_{}'.format(timestamp, epoch_number)
+        model_path = 'modelStates/model_{}_{}'.format(timestamp, epoch_number)
         torch.save(oneLayerModel.state_dict(), model_path)
 
     epoch_number += 1
-print('The parameters after training:')
-for param in oneLayerModel.parameters():
-  print(param)
+
+np.savetxt("X.txt", X, fmt='%d')
+np.savetxt("y.txt", y, fmt='%d')
