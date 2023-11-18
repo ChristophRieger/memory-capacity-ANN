@@ -131,8 +131,21 @@ def create_dataset(N, sparsity, size):
 
 # START
 
+timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+
+# parameters
+N = 10
+sparsity = 0.1 # fraction of active bits in data
+dataset_size = 10
+my_batch_size = 1
+EPOCHS = 1000
+learning_rate = 0.01
+momentum = 0.9
+
 # Command Center
 load_model = False
+model_state_path = 'modelStates/N{}_s{}_dS{}_lr{}_m{}_{}'.format(N, sparsity, dataset_size, learning_rate, momentum, timestamp)
+results_path =         'results/N{}_s{}_dS{}_lr{}_m{}_{}'.format(N, sparsity, dataset_size, learning_rate, momentum, timestamp)
 
 if torch.cuda.is_available():
     my_device = torch.device('cuda')
@@ -140,10 +153,7 @@ else:
     my_device = torch.device('cpu')
 print('Device: {}'.format(my_device))
 
-N = 100
-sparsity = 0.1 # fraction of active bits in data
-dataset_size = 10
-my_batch_size = 1
+
 
 X, y = create_dataset(N, sparsity, dataset_size) 
 
@@ -175,7 +185,7 @@ if load_model:
 #   print(param)
 
 # Optimizers specified in the torch.optim package
-optimizer = torch.optim.SGD(oneLayerModel.parameters(), lr=0.01, momentum=0.9)
+optimizer = torch.optim.SGD(oneLayerModel.parameters(), lr=learning_rate, momentum=momentum)
 
 # it seems this is the wrong loss function, as it is not supposed to be used
 # for multiple binary classes
@@ -202,15 +212,14 @@ loss_fn = torch.nn.BCELoss()
 # print(loss_fn(outputss, labelss))
 
 # Initializing in a separate cell so we can easily add more epochs to the same run
-timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-writer = SummaryWriter('runs/fashion_trainer_{}'.format(timestamp))
+writer = SummaryWriter(results_path)
 epoch_number = 0
-
-EPOCHS = 1000
 
 best_vloss = 1_000_000.
 if not os.path.exists('modelStates'):
   os.mkdir('modelStates')
+if not os.path.exists(model_state_path):
+  os.mkdir(model_state_path)
 for epoch in range(EPOCHS):
     # print('EPOCH {}:'.format(epoch_number + 1))
 
@@ -249,14 +258,15 @@ for epoch in range(EPOCHS):
     # Track best performance, and save the model's state
     if avg_vloss < best_vloss:
         best_vloss = avg_vloss
-        model_path = 'modelStates/model_{}_{}'.format(timestamp, epoch_number)
-        torch.save(oneLayerModel.state_dict(), model_path)
+        torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
 
     epoch_number += 1
 if not os.path.exists('results'):
   os.mkdir('results')
-np.savetxt("results/X_" + str(timestamp) + ".txt", X, fmt='%d')
-np.savetxt("results/y_" + str(timestamp) + ".txt", y, fmt='%d')
+if not os.path.exists(results_path):
+  os.mkdir(results_path)
+np.savetxt(results_path + "/X.txt", X, fmt='%d')
+np.savetxt(results_path + "/y.txt", y, fmt='%d')
 
 # calculate percentage of correctly learned patterns
 correct_y_predictions = np.zeros(((1,1)))
@@ -274,6 +284,6 @@ for i, vdata in enumerate(validation_loader):
     correct_y_predictions[0] += 1
     
 percentage_of_correct_memorizations = correct_y_predictions[0] / len(y)
-np.savetxt("results/percantage_of_patterns_memorized_" + str(timestamp) + ".txt", percentage_of_correct_memorizations, fmt='%d')
+np.savetxt(results_path + "/percentage_of_patterns_memorized.txt", percentage_of_correct_memorizations, fmt='%d')
 
   
