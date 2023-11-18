@@ -142,8 +142,8 @@ print('Device: {}'.format(my_device))
 
 N = 100
 sparsity = 0.1 # fraction of active bits in data
-dataset_size = 1000
-my_batch_size = 32
+dataset_size = 10
+my_batch_size = 1
 
 X, y = create_dataset(N, sparsity, dataset_size) 
 
@@ -157,7 +157,7 @@ X, y = create_dataset(N, sparsity, dataset_size)
 dataset_train = customTensorDataset(X, y, my_device)
 dataset_validation = customTensorDataset(X, y, my_device)
 train_loader = DataLoader(dataset=dataset_train, batch_size=my_batch_size, shuffle=True)
-validation_loader = DataLoader(dataset=dataset_validation, batch_size=3, shuffle=False)
+validation_loader = DataLoader(dataset=dataset_validation, batch_size=1, shuffle=False)
 # for index, data in enumerate(train_loader):
   # access input vector (dont know why we need double 0... its in double square brackets..)
   # print(data[0][0])  
@@ -206,7 +206,7 @@ timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 writer = SummaryWriter('runs/fashion_trainer_{}'.format(timestamp))
 epoch_number = 0
 
-EPOCHS = 1
+EPOCHS = 1000
 
 best_vloss = 1_000_000.
 if not os.path.exists('modelStates'):
@@ -253,6 +253,27 @@ for epoch in range(EPOCHS):
         torch.save(oneLayerModel.state_dict(), model_path)
 
     epoch_number += 1
+if not os.path.exists('results'):
+  os.mkdir('results')
+np.savetxt("results/X_" + str(timestamp) + ".txt", X, fmt='%d')
+np.savetxt("results/y_" + str(timestamp) + ".txt", y, fmt='%d')
 
-np.savetxt("X.txt", X, fmt='%d')
-np.savetxt("y.txt", y, fmt='%d')
+# calculate percentage of correctly learned patterns
+correct_y_predictions = np.zeros(((1,1)))
+for i, vdata in enumerate(validation_loader):
+  vinputs, vlabels = vdata
+  y_prediction = oneLayerModel(vinputs)
+  for j in range(y_prediction.size()[1]):
+    if y_prediction[0][j] >= 0.5:
+      y_prediction[0][j] = 1
+    else:
+      y_prediction[0][j] = 0
+  # this returns a vector, but I want a single bool
+  # if y_prediction[0] == vlabels[0]:
+  if torch.equal(y_prediction, vlabels):
+    correct_y_predictions[0] += 1
+    
+percentage_of_correct_memorizations = correct_y_predictions[0] / len(y)
+np.savetxt("results/percantage_of_patterns_memorized_" + str(timestamp) + ".txt", percentage_of_correct_memorizations, fmt='%d')
+
+  
