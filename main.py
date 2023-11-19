@@ -134,18 +134,18 @@ def create_dataset(N, sparsity, size):
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 # parameters
-N = 10
+N = 20
 sparsity = 0.1 # fraction of active bits in data
-dataset_size = 10
+dataset_size = 40
 my_batch_size = 1
-EPOCHS = 1000
+EPOCHS = 3000
 learning_rate = 0.01
 momentum = 0.9
 
 # Command Center
 load_model = False
-model_state_path = 'modelStates/N{}_s{}_dS{}_lr{}_m{}_{}'.format(N, sparsity, dataset_size, learning_rate, momentum, timestamp)
-results_path =         'results/N{}_s{}_dS{}_lr{}_m{}_{}'.format(N, sparsity, dataset_size, learning_rate, momentum, timestamp)
+model_state_path = 'modelStates/N{}_s{}_dS{}_lr{}_m{}_bS{}_E{}_{}'.format(N, sparsity, dataset_size, learning_rate, momentum, my_batch_size, EPOCHS, timestamp)
+results_path =         'results/N{}_s{}_dS{}_lr{}_m{}_bS{}_E{}_{}'.format(N, sparsity, dataset_size, learning_rate, momentum, my_batch_size, EPOCHS, timestamp)
 
 if torch.cuda.is_available():
     my_device = torch.device('cuda')
