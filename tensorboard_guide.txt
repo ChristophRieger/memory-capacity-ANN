@@ -1,0 +1,2 @@
+cd workingDir
+tensorboard --logdir=results
