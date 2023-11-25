@@ -14,6 +14,7 @@ import random
 import sys
 import math
 import os
+import matplotlib.pyplot as plt
 
 # class to build a dataset
 class customTensorDataset(Dataset):
@@ -106,99 +107,119 @@ def create_dataset(N, sparsity, size):
   return X, y
 
 # START
-
+plt.close("all")
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 # parameters
-N = 20
+N = 100
 sparsity = 0.1 # fraction of active bits in data
-dataset_size = 40
+# dataset_size = 2
 my_batch_size = 1
-EPOCHS = 5
+# EPOCHS = 2
 learning_rate = 0.01
-momentum = 0.9
+# momentum = 0.9
 
-# Command Center
-load_model = False
-model_state_path = 'modelStates/N{}_s{}_dS{}_lr{}_m{}_bS{}_E{}_{}'.format(N, sparsity, dataset_size, learning_rate, momentum, my_batch_size, EPOCHS, timestamp)
-results_path =         'results/N{}_s{}_dS{}_lr{}_m{}_bS{}_E{}_{}'.format(N, sparsity, dataset_size, learning_rate, momentum, my_batch_size, EPOCHS, timestamp)
+dataset_sizes = [200, 220, 240, 260, 280, 300]
 
-if torch.cuda.is_available():
-    my_device = torch.device('cuda')
-else:
-    my_device = torch.device('cpu')
-print('Device: {}'.format(my_device))
+for dataset_size in dataset_sizes:
 
-X, y = create_dataset(N, sparsity, dataset_size) 
-
-dataset_train = customTensorDataset(X, y, my_device)
-train_loader = DataLoader(dataset=dataset_train, batch_size=my_batch_size, shuffle=True)
-oneLayerModel = OneLayerModel(N, N, my_device)
-if load_model:
-  oneLayerModel.load_state_dict(torch.load('path_to_model'))
-
-# Optimizers specified in the torch.optim package
-optimizer = torch.optim.SGD(oneLayerModel.parameters(), lr=learning_rate, momentum=momentum)
-
-# I try Binary Cross Entropy Loss...
-loss_fn = torch.nn.BCELoss()
-# !!! TODO There is BCEWITHLOGITSLOSS which combines this loss with also applying 
-# the sigmoid function, and it says its prefered to use the 2 separately...
-
-# Initializing in a separate cell so we can easily add more epochs to the same run
-writer = SummaryWriter(results_path)
-epoch_number = 0
-
-best_loss = 1_000_000.
-if not os.path.exists('modelStates'):
-  os.mkdir('modelStates')
-if not os.path.exists(model_state_path):
-  os.mkdir(model_state_path)
-for epoch in range(EPOCHS):
-    print('EPOCH {}:'.format(epoch_number + 1))
-
-    # Make sure gradient tracking is on, and do a pass over the data
-    oneLayerModel.train(True)
-    avg_loss = train_one_epoch(epoch_number, train_loader, oneLayerModel, optimizer, loss_fn, my_batch_size, my_device, writer)
-
-    # Set the model to evaluation mode, disabling dropout and using population
-    # statistics for batch normalization.
-    oneLayerModel.eval()
-            
-    print('LOSS train {}'.format(avg_loss))
-
-    writer.add_scalars('Training',
-                    { 'Training' : avg_loss },
-                    epoch_number + 1)
-    writer.flush()
-
-    # Track best performance, and save the model's state
-    if avg_loss < best_loss:
-        best_loss = avg_loss
-        torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
-
-    epoch_number += 1
-if not os.path.exists('results'):
-  os.mkdir('results')
-if not os.path.exists(results_path):
-  os.mkdir(results_path)
-np.savetxt(results_path + "/X.txt", X, fmt='%d')
-np.savetxt(results_path + "/y.txt", y, fmt='%d')
-
-# calculate percentage of correctly learned patterns
-correct_y_predictions = np.zeros(((1,1)))
-for i, data in enumerate(train_loader):
-  inputs, labels = data
-  y_prediction = oneLayerModel(inputs)
-  for j in range(y_prediction.size()[1]):
-    if y_prediction[0][j] >= 0.5:
-      y_prediction[0][j] = 1
-    else:
-      y_prediction[0][j] = 0
-  if torch.equal(y_prediction, labels):
-    correct_y_predictions[0] += 1
-    
-percentage_of_correct_memorizations = correct_y_predictions[0] / len(y)
-np.savetxt(results_path + "/percentage_of_patterns_memorized.txt", percentage_of_correct_memorizations, fmt='%d')
-
+  # Command Center
+  load_model = False
+  model_state_path = 'modelStates/N{}_s{}_dS{}_lr{}_bS{}_{}'.format(N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
+  results_path =         'results/N{}_s{}_dS{}_lr{}_bS{}_{}'.format(N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
   
+  if torch.cuda.is_available():
+      my_device = torch.device('cuda')
+  else:
+      my_device = torch.device('cpu')
+  print('Device: {}'.format(my_device))
+  
+  X, y = create_dataset(N, sparsity, dataset_size) 
+  
+  dataset_train = customTensorDataset(X, y, my_device)
+  train_loader = DataLoader(dataset=dataset_train, batch_size=my_batch_size, shuffle=True)
+  oneLayerModel = OneLayerModel(N, N, my_device)
+  if load_model:
+    oneLayerModel.load_state_dict(torch.load('path_to_model'))
+  
+  # Optimizers specified in the torch.optim package
+  # optimizer = torch.optim.SGD(oneLayerModel.parameters(), lr=learning_rate, momentum=momentum)
+  optimizer = torch.optim.Adam(oneLayerModel.parameters(), lr=learning_rate)
+  # I try Binary Cross Entropy Loss...
+  loss_fn = torch.nn.BCELoss()
+  # !!! TODO There is BCEWITHLOGITSLOSS which combines this loss with also applying 
+  # the sigmoid function, and it says its prefered to use the 2 separately...
+  
+  # Initializing in a separate cell so we can easily add more epochs to the same run
+  writer = SummaryWriter(results_path)
+  epoch_number = 0
+  
+  loss_per_epoch = []
+  best_loss = 1_000_000.
+  avg_loss = 0
+  if not os.path.exists('modelStates'):
+    os.mkdir('modelStates')
+  if not os.path.exists(model_state_path):
+    os.mkdir(model_state_path)
+  # for epoch in range(EPOCHS):
+  while True:
+      print('EPOCH {}:'.format(epoch_number + 1))
+  
+      # Make sure gradient tracking is on, and do a pass over the data
+      oneLayerModel.train(True)
+      avg_loss = train_one_epoch(epoch_number, train_loader, oneLayerModel, optimizer, loss_fn, my_batch_size, my_device, writer)
+  
+      # Set the model to evaluation mode, disabling dropout and using population
+      # statistics for batch normalization.
+      oneLayerModel.eval()
+              
+      print('LOSS train {}'.format(avg_loss))
+      loss_per_epoch.append(avg_loss)
+      writer.add_scalars('Training loss',
+                      { 'Training loss' : avg_loss },
+                      epoch_number + 1)
+      writer.flush()
+  
+      if best_loss - avg_loss < 10^-4:
+        break
+      if epoch_number > 2000:
+        break
+      # Track best performance, and save the model's state
+      if avg_loss < best_loss:
+          best_loss = avg_loss
+          torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
+  
+      epoch_number += 1
+  if not os.path.exists('results'):
+    os.mkdir('results')
+  if not os.path.exists(results_path):
+    os.mkdir(results_path)
+  np.savetxt(results_path + "/X.txt", X, fmt='%d')
+  np.savetxt(results_path + "/y.txt", y, fmt='%d')
+  
+  # calculate percentage of correctly learned patterns
+  correct_y_predictions = np.zeros(((1,1)))
+  for i, data in enumerate(train_loader):
+    inputs, labels = data
+    y_prediction = oneLayerModel(inputs)
+    for j in range(y_prediction.size()[1]):
+      if y_prediction[0][j] >= 0.5:
+        y_prediction[0][j] = 1
+      else:
+        y_prediction[0][j] = 0
+    if torch.equal(y_prediction, labels):
+      correct_y_predictions[0] += 1
+      
+  percentage_of_correct_memorizations = correct_y_predictions[0] / len(y)
+  np.savetxt(results_path + "/percentage_of_patterns_memorized.txt", percentage_of_correct_memorizations, fmt='%d')
+  
+  
+  plt.figure()  
+  plt.plot(loss_per_epoch)
+  plt.title("Training loss ({}% accuracy)".format(percentage_of_correct_memorizations[0]*100), fontsize=14)
+  plt.ylabel("Binary Cross Entropy", fontsize=12)
+  plt.xlabel("Epoch", fontsize=12)
+  plt.tick_params(axis='both', labelsize=11)
+  plt.savefig(results_path + "/trainingPlot" + ".svg")  
+  plt.savefig(results_path + "/trainingPlot" + ".png")
+    
