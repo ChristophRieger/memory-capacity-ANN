@@ -180,9 +180,9 @@ for dataset_size in dataset_sizes:
                       epoch_number + 1)
       writer.flush()
   
-      if best_loss - avg_loss < 10^-4:
+      if best_loss - avg_loss < 10 ** -4:
         break
-      if epoch_number > 2000:
+      if epoch_number > 500:
         break
       # Track best performance, and save the model's state
       if avg_loss < best_loss:
