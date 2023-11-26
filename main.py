@@ -181,13 +181,14 @@ for dataset_size in dataset_sizes:
       writer.flush()
   
       if best_loss - avg_loss < 10 ** -4:
+        torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
         break
       if epoch_number > 500:
+        torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
         break
       # Track best performance, and save the model's state
       if avg_loss < best_loss:
           best_loss = avg_loss
-          torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
   
       epoch_number += 1
   if not os.path.exists('results'):
