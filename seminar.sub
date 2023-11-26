@@ -1,0 +1,8 @@
+#!/bin/bash
+#SBATCH -p IGIcuda0 
+#SBATCH --gres=gpu:2
+#SBATCH --error=masterArbeit.%J.err
+#SBATCH --output=masterArbeit.%J.out
+
+cd /home/rieger/seminar/code/
+python3 main.py
