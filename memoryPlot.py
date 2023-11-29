@@ -11,10 +11,11 @@ import matplotlib.pyplot as plt
 
 sparsity = 0.1
 
-N = [10, 20, 30, 40, 50, 75, 100]
+# at N200 i increased best_loss - avg_loss from < 10 ** -4 to < 10**-5
+N =                  [10, 20, 30, 40, 50, 75 , 100, 200, 250, 400 ]
 # This number is taken from the biggest dataset_size where 100% of patterns are 
 # memorized
-number_of_patterns = [10, 30, 50, 70, 90, 160, 260]
+number_of_patterns = [10, 30, 50, 70, 90, 160, 260, 520, 610, 975 ]
 
 plt.close("all")
 plt.figure()  

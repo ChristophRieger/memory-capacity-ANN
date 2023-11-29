@@ -111,7 +111,7 @@ plt.close("all")
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 # parameters
-N = 100
+N = 400
 sparsity = 0.1 # fraction of active bits in data
 # dataset_size = 2
 my_batch_size = 1
@@ -180,7 +180,7 @@ for dataset_size in dataset_sizes:
                       epoch_number + 1)
       writer.flush()
   
-      if best_loss - avg_loss < 10 ** -4:
+      if best_loss - avg_loss < 10 ** -6 and epoch_number > 100:
         torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
         break
       if epoch_number > 500:
