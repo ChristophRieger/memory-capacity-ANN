@@ -12,10 +12,10 @@ import matplotlib.pyplot as plt
 sparsity = 0.1
 
 # at N200 i increased best_loss - avg_loss from < 10 ** -4 to < 10**-5
-N =                  [10, 20, 30, 40, 50, 75 , 100, 200, 250, 400 ]
+N =                  [10, 20, 30, 40, 50, 75 , 100, 200, 250, 400, 600, 800, 1000 ]
 # This number is taken from the biggest dataset_size where 100% of patterns are 
 # memorized
-number_of_patterns = [10, 30, 50, 70, 90, 160, 260, 520, 610, 975 ]
+number_of_patterns = [10, 30, 50, 70, 90, 160, 260, 520, 610, 975, 1280, 1720, 2030 ]
 
 plt.close("all")
 plt.figure()  
@@ -26,3 +26,22 @@ plt.xlabel("N", fontsize=12)
 plt.tick_params(axis='both', labelsize=11)
 plt.savefig("memoryPlot" + ".svg")  
 plt.savefig("memoryPlot" + ".png")
+
+plt.figure()  
+plt.plot(N, [i / j for i, j in zip(number_of_patterns, N)])
+plt.title("# of patterns / N", fontsize=14)
+plt.ylabel("Slope", fontsize=12)
+plt.xlabel("N", fontsize=12)
+plt.tick_params(axis='both', labelsize=11)
+plt.savefig("slope" + ".svg")  
+plt.savefig("slope" + ".png")
+
+plt.figure()  
+plt.plot(N, [i / j**2 for i, j in zip(number_of_patterns, N)])
+plt.title("# of patterns / N^2", fontsize=14)
+plt.ylabel("", fontsize=12)
+plt.xlabel("N", fontsize=12)
+plt.tick_params(axis='both', labelsize=11)
+plt.savefig("mByN2" + ".svg")  
+plt.savefig("mByN2" + ".png")
+
