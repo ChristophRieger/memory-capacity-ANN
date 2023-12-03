@@ -80,9 +80,9 @@ def create_dataset(N, sparsity, size):
   inactive_bits = int(N * (1 - sparsity))
   
   # check if size is bigger than the amount of possibilities
-  possible_permutations = math.factorial(N) / (math.factorial(active_bits) * math.factorial(inactive_bits))
-  if (size > possible_permutations):
-    sys.exit("The given size of " + str(size) + " is bigger than the amount of possible permutations of " + str(int(possible_permutations)))
+  # possible_permutations = math.factorial(N) / (math.factorial(active_bits) * math.factorial(inactive_bits))
+  # if (size > possible_permutations):
+    # sys.exit("The given size of " + str(size) + " is bigger than the amount of possible permutations of " + str(int(possible_permutations)))
 
   for i in range(size):
     X_choices = random.sample(bits, active_bits)
@@ -111,7 +111,7 @@ plt.close("all")
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 # parameters
-N = 400
+N = 3000
 sparsity = 0.1 # fraction of active bits in data
 # dataset_size = 2
 my_batch_size = 1
@@ -119,7 +119,7 @@ my_batch_size = 1
 learning_rate = 0.01
 # momentum = 0.9
 
-dataset_sizes = [200, 220, 240, 260, 280, 300]
+dataset_sizes = [3000, 3500, 4000, 4500, 5000, 5500]
 
 for dataset_size in dataset_sizes:
 
@@ -175,12 +175,12 @@ for dataset_size in dataset_sizes:
               
       print('LOSS train {}'.format(avg_loss))
       loss_per_epoch.append(avg_loss)
-      writer.add_scalars('Training loss',
-                      { 'Training loss' : avg_loss },
-                      epoch_number + 1)
-      writer.flush()
+      # writer.add_scalars('Training loss',
+      #                 { 'Training loss' : avg_loss },
+      #                 epoch_number + 1)
+      # writer.flush()
   
-      if best_loss - avg_loss < 10 ** -6 and epoch_number > 100:
+      if best_loss - avg_loss < 10 ** -6 and epoch_number > 150:
         torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
         break
       if epoch_number > 500:
