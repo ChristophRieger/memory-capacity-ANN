@@ -111,7 +111,7 @@ plt.close("all")
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 # parameters
-N = 3000
+N = 600
 sparsity = 0.1 # fraction of active bits in data
 # dataset_size = 2
 my_batch_size = 1
@@ -119,7 +119,7 @@ my_batch_size = 1
 learning_rate = 0.01
 # momentum = 0.9
 
-dataset_sizes = [3000, 3500, 4000, 4500, 5000, 5500]
+dataset_sizes = [1280]
 
 for dataset_size in dataset_sizes:
 
@@ -157,6 +157,7 @@ for dataset_size in dataset_sizes:
   loss_per_epoch = []
   best_loss = 1_000_000.
   avg_loss = 0
+  percentage_of_correct_memorizations_list = []
   if not os.path.exists('modelStates'):
     os.mkdir('modelStates')
   if not os.path.exists(model_state_path):
@@ -175,17 +176,35 @@ for dataset_size in dataset_sizes:
               
       print('LOSS train {}'.format(avg_loss))
       loss_per_epoch.append(avg_loss)
+      
+      # calculate percentage of correctly learned patterns
+      # correct_y_predictions = np.zeros(((1,1)))
+      # for i, data in enumerate(train_loader):
+      #   print(str(i))
+      #   inputs, labels = data
+      #   y_prediction = oneLayerModel(inputs)
+      #   for j in range(y_prediction.size()[1]):
+      #     if y_prediction[0][j] >= 0.5:
+      #       y_prediction[0][j] = 1
+      #     else:
+      #       y_prediction[0][j] = 0
+      #   if torch.equal(y_prediction, labels):
+      #     correct_y_predictions[0] += 1
+      # percentage_of_correct_memorizations_list.append(correct_y_predictions[0] / len(y))
       # writer.add_scalars('Training loss',
       #                 { 'Training loss' : avg_loss },
       #                 epoch_number + 1)
       # writer.flush()
   
-      if best_loss - avg_loss < 10 ** -6 and epoch_number > 150:
+      if best_loss - avg_loss < 10 ** -6 and epoch_number > 200:
         torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
         break
-      if epoch_number > 500:
+      if epoch_number > 10:
         torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
         break
+      # if percentage_of_correct_memorizations_list[-1][0] == 1:
+      #   torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
+      #   break
       # Track best performance, and save the model's state
       if avg_loss < best_loss:
           best_loss = avg_loss
@@ -223,4 +242,13 @@ for dataset_size in dataset_sizes:
   plt.tick_params(axis='both', labelsize=11)
   plt.savefig(results_path + "/trainingPlot" + ".svg")  
   plt.savefig(results_path + "/trainingPlot" + ".png")
+    
+  # plt.figure()  
+  # plt.plot(percentage_of_correct_memorizations_list)
+  # plt.title("", fontsize=14)
+  # plt.ylabel("Percentage of patterns memorized", fontsize=12)
+  # plt.xlabel("Epoch", fontsize=12)
+  # plt.tick_params(axis='both', labelsize=11)
+  # plt.savefig(results_path + "/memorizationPlot" + ".svg")  
+  # plt.savefig(results_path + "/memorizationPlot" + ".png")
     
