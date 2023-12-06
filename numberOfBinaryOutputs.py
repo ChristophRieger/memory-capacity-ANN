@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Dec  5 17:15:09 2023
+Created on Wed Dec  6 07:40:07 2023
 
 @author: chris
 """
@@ -14,17 +14,17 @@ number_of_patterns = [10, 30, 50, 70, 90, 160, 260, 520, 610, 975, 1280, 1720, 2
 sparsity = 0.1
 
 
-needed_connections = []
+amount_of_binary_outputs = []
 for i in range(len(N)):
-  needed_connections.append(N[i] * N[i] * sparsity * number_of_patterns[i])
+  amount_of_binary_outputs.append(N[i] * number_of_patterns[i])
 
 plt.close("all")
 
 plt.figure()
-plt.plot(N, needed_connections)
+plt.plot(N, amount_of_binary_outputs)
 # plt.yscale("log")
-plt.ylabel("# of connections needed to memorize patterns", fontsize=12)
+plt.ylabel("# of binary outputs", fontsize=12)
 plt.xlabel("N", fontsize=12)
 plt.ticklabel_format(axis='y', style='sci', scilimits=(4,4))
 
-plt.savefig("numberOfUsedConnections" + ".png")
+plt.savefig("numberOfBinaryOutputs" + ".png")
