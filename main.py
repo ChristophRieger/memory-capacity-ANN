@@ -16,6 +16,28 @@ import math
 import os
 import matplotlib.pyplot as plt
 
+# START
+plt.close("all")
+timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+
+# Command center
+use_custom_loss = False
+N = 100
+dataset_sizes = [20]
+max_epochs = 500
+
+if use_custom_loss:
+  use_custom_loss_str = "Y"
+else:
+  use_custom_loss_str = "N"
+# parameters
+variance_runs = 5
+sparsity = 0.1 # fraction of active bits in data
+tolerance = 0.1 # how many bits of the active bits are ignored during training and validation. Also how many inactive bits are ignored
+bits_to_ignore = int(N * sparsity * tolerance)
+my_batch_size = 1
+learning_rate = 0.01
+
 # class to build a dataset
 class customTensorDataset(Dataset):
   def __init__(self, X, y, my_device):
@@ -150,36 +172,15 @@ def create_dataset(N, sparsity, size):
   print("Dataset generated!")
   return X, y
   
-# START
-plt.close("all")
-timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-
-# Command center
-use_custom_loss = True
-
-# parameters
-N = 20
-max_epochs = 300
-variance_runs = 10
-sparsity = 0.1 # fraction of active bits in data
-tolerance = 0.1 # how many bits of the active bits are ignored during training and validation. Also how many inactive bits are ignored
-bits_to_ignore = int(N * sparsity * tolerance)
-
-# dataset_size = 2
-my_batch_size = 1
-# EPOCHS = 2
-learning_rate = 0.01
-# momentum = 0.9
-
-dataset_sizes = [30, 35, 40, 45]
+# MAIN
 
 for dataset_size in dataset_sizes:
   accuracies = []
   for variance_iterator in range(variance_runs):
     # Command Center
     load_model = False
-    model_state_path = 'modelStates/N{}_s{}_dS{}_lr{}_bS{}_{}'.format(N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
-    results_path =         'results/N{}_s{}_dS{}_lr{}_bS{}_{}'.format(N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
+    model_state_path = 'modelStates/custom{}_N{}_s{}_dS{}_lr{}_bS{}_{}'.format(use_custom_loss_str, N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
+    results_path =         'results/custom{}_N{}_s{}_dS{}_lr{}_bS{}_{}'.format(use_custom_loss_str, N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
     
     if torch.cuda.is_available():
         my_device = torch.device('cuda')
@@ -257,7 +258,7 @@ for dataset_size in dataset_sizes:
           # torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
           # break
         if epoch_number > max_epochs:
-          torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
+          torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}_{}'.format(variance_iterator, epoch_number))
           break
         # if percentage_of_correct_memorizations_list[-1][0] == 1:
         #   torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
@@ -316,10 +317,13 @@ for dataset_size in dataset_sizes:
     # plt.savefig(results_path + "/trainingPlot{}".format(variance_iterator) + ".svg")  
     plt.savefig(results_path + "/trainingPlot{}".format(variance_iterator) + ".png")
   
+  memorized_patterns = [accu * dataset_size for accu in accuracies]
+  max_patterns = np.max(memorized_patterns)
+  mean_patterns = np.mean(memorized_patterns)
+  std_patterns = np.std(memorized_patterns)
   mean_accuracy = np.mean(accuracies)
-  variance = np.var(accuracies)
   mean_patterns_memorized = dataset_size * mean_accuracy
-  np.savetxt(results_path + "/{}patterns_{}accu_{}var_{}varRuns.txt".format(mean_patterns_memorized, mean_accuracy, variance, variance_runs), [12345], fmt='%d')
+  np.savetxt(results_path + "/{}maxPatterns_{}meanPatterns_{}accu_{}std_{}varRuns.txt".format(max_patterns, mean_patterns_memorized, mean_accuracy, std_patterns, variance_runs), [12345], fmt='%d')
 
   
     
