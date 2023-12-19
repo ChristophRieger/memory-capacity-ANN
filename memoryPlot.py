@@ -100,9 +100,10 @@ dataset_size.append(350)
 
 #training right now
 N.append(200)
-number_of_patterns.append(653)
-mean_of_patterns.append(0)
-std.append(5)
+number_of_patterns.append(694)
+mean_of_patterns.append(674.8)
+std.append(20.7)
+dataset_size.append(700)
 
 N.append(300)
 number_of_patterns.append(1077)
