@@ -43,10 +43,10 @@ std.append(13.18)
 dataset_size.append(900)
 
 N.append(400)
-number_of_patterns.append(1098)
-mean_of_patterns.append(1083.6)
-std.append(18.8)
-dataset_size.append(1100)
+number_of_patterns.append(1194)
+mean_of_patterns.append(1165.6)
+std.append(23.56)
+dataset_size.append(1200)
 
 N.append(500)
 number_of_patterns.append(1494)
@@ -98,7 +98,6 @@ mean_of_patterns.append(305)
 std.append(24)
 dataset_size.append(350)
 
-#training right now
 N.append(200)
 number_of_patterns.append(694)
 mean_of_patterns.append(674.8)
@@ -112,17 +111,19 @@ std.append(26.56)
 dataset_size.append(1100)
 
 N.append(400)
-number_of_patterns.append(1473)
-mean_of_patterns.append(1333.2)
-std.append(91.18)
-dataset_size.append(1500)
-# !!! tried ds 1600 with maaany epochs (600)... performed worse than ds 1500 with 200 epochs!!!
+number_of_patterns.append(1580)
+mean_of_patterns.append(1395.2)
+std.append(169)
+dataset_size.append(1600)
+# !!! mit viel mehr epochs kann man manchmal noch 100 weiter rauf gehn, aber es wird immer schwueriger
+#  1500/200 auf 1600/600...
 
 N.append(500)
 number_of_patterns.append(1963)
 mean_of_patterns.append(1923)
 std.append(26.43)
 dataset_size.append(2000)
+# !!! 500 epochs... mby gehn 100 patterns mehr
 
 plt.figure(figsize=(10,15))
 plt.subplot(3, 1, 1)
