@@ -37,9 +37,9 @@ std.append(32)
 dataset_size.append(600)
 
 N.append(300)
-number_of_patterns.append(865)
-mean_of_patterns.append(852.2)
-std.append(13.18)
+number_of_patterns.append(897)
+mean_of_patterns.append(883.8)
+std.append(11.95)
 dataset_size.append(900)
 
 N.append(400)
@@ -119,11 +119,12 @@ dataset_size.append(1600)
 #  1500/200 auf 1600/600...
 
 N.append(500)
-number_of_patterns.append(1963)
-mean_of_patterns.append(1923)
-std.append(26.43)
-dataset_size.append(2000)
+number_of_patterns.append(2008)
+mean_of_patterns.append(1904)
+std.append(141.7)
+dataset_size.append(2100)
 # !!! 500 epochs... mby gehn 100 patterns mehr
+#  hab jetzt 700 epochen mit 2100 ds gemacht... besser, aber 100 von 2100 nicht erkannt
 
 plt.figure(figsize=(10,15))
 plt.subplot(3, 1, 1)
