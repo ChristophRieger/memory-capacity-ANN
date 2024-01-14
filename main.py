@@ -21,17 +21,20 @@ plt.close("all")
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 # Command center
-use_custom_loss = False
+use_custom_loss = True
 N = 100
-dataset_sizes = [20]
+dataset_sizes = [400]
 max_epochs = 500
+load_model = False
+include_recurrent_layer = True
+number_of_recurrences = 1
 
 if use_custom_loss:
   use_custom_loss_str = "Y"
 else:
   use_custom_loss_str = "N"
 # parameters
-variance_runs = 5
+variance_runs = 1
 sparsity = 0.1 # fraction of active bits in data
 tolerance = 0.1 # how many bits of the active bits are ignored during training and validation. Also how many inactive bits are ignored
 bits_to_ignore = int(N * sparsity * tolerance)
@@ -52,18 +55,33 @@ class customTensorDataset(Dataset):
 
 class OneLayerModel(torch.nn.Module):
 
-  def __init__(self, inputSize, outputSize, my_device):
+  def __init__(self, inputSize, outputSize, my_device, include_recurrent_layer):
       super(OneLayerModel, self).__init__()
-      self.fullyConnectedLayer = torch.nn.Linear(inputSize, outputSize)
+      self.include_recurrent_layer = include_recurrent_layer
+      if include_recurrent_layer:
+        # !!! this didnt work, loss never went below 0.35... dont know what this does
+        # self.recurrentFullyConnectedLayer = torch.nn.RNN(inputSize, outputSize, num_layers=1)
+        # INSTEAD https://pytorch.org/tutorials/beginner/former_torchies/nnft_tutorial.html#example-2-recurrent-net
+        # says i can just repeat multiple linear layers for recurrence
+        # ... as says my own logic!
+        self.fullyConnectedLayer = torch.nn.Linear(inputSize + outputSize, outputSize)
+      else:
+        self.fullyConnectedLayer = torch.nn.Linear(inputSize, outputSize)
       self.activation = torch.nn.Sigmoid()
       # This has to be called last, otherwise it doesn't move the parameters
       # above to the device
       self.to(my_device) # move the model to the same device as tensors
 
-  def forward(self, x):
-      x = self.fullyConnectedLayer(x)
-      x = self.activation(x)
-      return x
+  def forward(self, x, hidden=None):
+      if self.include_recurrent_layer:        
+        combined = torch.cat((x, hidden), 1)
+        x = self.fullyConnectedLayer(combined)
+        x = self.activation(x)
+        return x, x
+      else:
+        x = self.fullyConnectedLayer(x)
+        x = self.activation(x)
+        return x
 
 def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_batch_size, my_device, tb_writer, use_custom_loss):
     running_loss = 0.
@@ -79,7 +97,12 @@ def train_one_epoch(epoch_index, training_loader, model, optimizer, loss_fn, my_
         optimizer.zero_grad()
 
         # Make predictions for this batch
-        outputs = model(inputs)
+        if include_recurrent_layer:
+          hidden = torch.zeros(1, N, device=my_device)
+          for reccurrence in range(number_of_recurrences + 1):
+            outputs, hidden = model(inputs, hidden)
+        else:
+          outputs = model(inputs)
         # Compute the loss and its gradients
         if use_custom_loss:
           loss = loss_fn(outputs, labels)
@@ -177,11 +200,12 @@ def create_dataset(N, sparsity, size):
 for dataset_size in dataset_sizes:
   accuracies = []
   for variance_iterator in range(variance_runs):
-    # Command Center
-    load_model = False
-    model_state_path = 'modelStates/custom{}_N{}_s{}_dS{}_lr{}_bS{}_{}'.format(use_custom_loss_str, N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
-    results_path =         'results/custom{}_N{}_s{}_dS{}_lr{}_bS{}_{}'.format(use_custom_loss_str, N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
-    
+    if include_recurrent_layer:
+      model_state_path = 'modelStatesRecurrent/custom{}_N{}_s{}_dS{}_lr{}_bS{}_{}'.format(use_custom_loss_str, N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
+      results_path =         'resultsRecurrent/custom{}_N{}_s{}_dS{}_lr{}_bS{}_{}'.format(use_custom_loss_str, N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
+    else:
+      model_state_path = 'modelStates/custom{}_N{}_s{}_dS{}_lr{}_bS{}_{}'.format(use_custom_loss_str, N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
+      results_path =         'results/custom{}_N{}_s{}_dS{}_lr{}_bS{}_{}'.format(use_custom_loss_str, N, sparsity, dataset_size, learning_rate, my_batch_size, timestamp)
     if torch.cuda.is_available():
         my_device = torch.device('cuda')
     else:
@@ -193,7 +217,12 @@ for dataset_size in dataset_sizes:
     
     dataset_train = customTensorDataset(X, y, my_device)
     train_loader = DataLoader(dataset=dataset_train, batch_size=my_batch_size, shuffle=True)
-    oneLayerModel = OneLayerModel(N, N, my_device)
+    oneLayerModel = OneLayerModel(N, N, my_device, include_recurrent_layer)
+    
+    # for name, param in oneLayerModel.named_parameters():
+    #   print(name)
+    #   print(param)
+    
     if load_model:
       oneLayerModel.load_state_dict(torch.load('path_to_model'))
     
@@ -216,8 +245,12 @@ for dataset_size in dataset_sizes:
     best_loss = 1_000_000.
     avg_loss = 0
     percentage_of_correct_memorizations_list = []
-    if not os.path.exists('modelStates'):
-      os.mkdir('modelStates')
+    if include_recurrent_layer:
+      if not os.path.exists('modelStatesRecurrent'):
+        os.mkdir('modelStatesRecurrent')
+    else:
+      if not os.path.exists('modelStates'):
+        os.mkdir('modelStates')
     if not os.path.exists(model_state_path):
       os.mkdir(model_state_path)
     # for epoch in range(EPOCHS):
@@ -268,8 +301,12 @@ for dataset_size in dataset_sizes:
             best_loss = avg_loss
     
         epoch_number += 1
-    if not os.path.exists('results'):
-      os.mkdir('results')
+    if include_recurrent_layer:
+      if not os.path.exists('resultsRecurrent'):
+        os.mkdir('resultsRecurrent')
+    else:
+      if not os.path.exists('results'):
+        os.mkdir('results')
     if not os.path.exists(results_path):
       os.mkdir(results_path)
     np.savetxt(results_path + "/X.txt", X, fmt='%d')
@@ -279,7 +316,11 @@ for dataset_size in dataset_sizes:
     correct_y_predictions = np.zeros(((1,1)))
     for i, data in enumerate(train_loader):
       inputs, labels = data
-      y_prediction = oneLayerModel(inputs)
+      if include_recurrent_layer:
+        hidden = torch.zeros(1, N, device=my_device)
+        y_prediction, hidden = oneLayerModel(inputs, hidden)
+      else:
+        y_prediction = oneLayerModel(inputs)
       for j in range(y_prediction.size()[1]):
         if y_prediction[0][j] >= 0.5:
           y_prediction[0][j] = 1
