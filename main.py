@@ -22,12 +22,12 @@ timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 # Command center
 use_custom_loss = True
-N = 100
-dataset_sizes = [400]
-max_epochs = 500
+N = 20
+dataset_sizes = [20]
+max_epochs = 200
 load_model = False
 include_recurrent_layer = True
-number_of_recurrences = 1
+number_of_recurrences = 10
 
 if use_custom_loss:
   use_custom_loss_str = "Y"
@@ -57,6 +57,7 @@ class OneLayerModel(torch.nn.Module):
 
   def __init__(self, inputSize, outputSize, my_device, include_recurrent_layer):
       super(OneLayerModel, self).__init__()
+      self.N = outputSize
       self.include_recurrent_layer = include_recurrent_layer
       if include_recurrent_layer:
         # !!! this didnt work, loss never went below 0.35... dont know what this does
@@ -75,6 +76,9 @@ class OneLayerModel(torch.nn.Module):
   def forward(self, x, hidden=None):
       if self.include_recurrent_layer:        
         combined = torch.cat((x, hidden), 1)
+        # zero diagonal weights of recurrent part of the layer (output_i to output_i)
+        for i in range(self.N):
+          self.fullyConnectedLayer.weight.data[i][self.N + i] = 0
         x = self.fullyConnectedLayer(combined)
         x = self.activation(x)
         return x, x
@@ -219,12 +223,23 @@ for dataset_size in dataset_sizes:
     train_loader = DataLoader(dataset=dataset_train, batch_size=my_batch_size, shuffle=True)
     oneLayerModel = OneLayerModel(N, N, my_device, include_recurrent_layer)
     
-    # for name, param in oneLayerModel.named_parameters():
-    #   print(name)
-    #   print(param)
+
     
     if load_model:
-      oneLayerModel.load_state_dict(torch.load('path_to_model'))
+      oneLayerModel.load_state_dict(torch.load('modelStatesRecurrent\customY_N100_s0.1_dS450_lr0.01_bS1_20240114_193658\model_0_501'))
+      if not os.path.exists('weights'):
+        os.mkdir('weights')
+      for name, param in oneLayerModel.named_parameters():
+        # print(name)
+        # print(param)
+        # np.savetxt("weights/test.txt", [param], fmt='%d')
+        # np.savetxt("weights/{}_{}.txt".format(name, param), [param], fmt='%d')
+        plt.figure()
+        plt.title(name)
+        plt.imshow(param.cpu().detach().numpy(), cmap='viridis')
+        plt.colorbar()
+        plt.show()
+      sys.exit("quit to inspect weights")
     
     # Optimizers specified in the torch.optim package
     # optimizer = torch.optim.SGD(oneLayerModel.parameters(), lr=learning_rate, momentum=momentum)
@@ -366,5 +381,13 @@ for dataset_size in dataset_sizes:
   mean_patterns_memorized = dataset_size * mean_accuracy
   np.savetxt(results_path + "/{}maxPatterns_{}meanPatterns_{}accu_{}std_{}varRuns.txt".format(max_patterns, mean_patterns_memorized, mean_accuracy, std_patterns, variance_runs), [12345], fmt='%d')
 
-  
+  for name, param in oneLayerModel.named_parameters():
+    # np.savetxt("weights/test.txt", [param], fmt='%d')
+    # np.savetxt("weights/{}_{}.txt".format(name, param), [param], fmt='%d')
+    if "weight" in name:
+      plt.figure()
+      plt.title(name)
+      plt.imshow(param.cpu().detach().numpy(), cmap='viridis')
+      plt.colorbar()
+      plt.show()
     
