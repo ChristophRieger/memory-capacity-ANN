@@ -22,19 +22,20 @@ timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 # Command center
 use_custom_loss = True
-N = 20
-dataset_sizes = [20]
-max_epochs = 200
+N = 100
+dataset_sizes = [400, 500, 600, 700, 800]
+
+max_epochs = 500
 load_model = False
 include_recurrent_layer = True
-number_of_recurrences = 10
+number_of_recurrences = 1
 
 if use_custom_loss:
   use_custom_loss_str = "Y"
 else:
   use_custom_loss_str = "N"
 # parameters
-variance_runs = 1
+variance_runs = 5
 sparsity = 0.1 # fraction of active bits in data
 tolerance = 0.1 # how many bits of the active bits are ignored during training and validation. Also how many inactive bits are ignored
 bits_to_ignore = int(N * sparsity * tolerance)
@@ -333,7 +334,8 @@ for dataset_size in dataset_sizes:
       inputs, labels = data
       if include_recurrent_layer:
         hidden = torch.zeros(1, N, device=my_device)
-        y_prediction, hidden = oneLayerModel(inputs, hidden)
+        for recurrenceIterator in range(number_of_recurrences + 1):
+          y_prediction, hidden = oneLayerModel(inputs, hidden)
       else:
         y_prediction = oneLayerModel(inputs)
       for j in range(y_prediction.size()[1]):
