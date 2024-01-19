@@ -15,6 +15,7 @@ import sys
 import math
 import os
 import matplotlib.pyplot as plt
+import copy
 
 # START
 plt.close("all")
@@ -23,9 +24,9 @@ timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 # Command center
 use_custom_loss = True
 N = 100
-dataset_sizes = [400, 500, 600, 700, 800]
+dataset_sizes = [1000, 1500, 2000]
 
-max_epochs = 500
+max_epochs = 300
 load_model = False
 include_recurrent_layer = True
 number_of_recurrences = 1
@@ -259,6 +260,7 @@ for dataset_size in dataset_sizes:
     
     loss_per_epoch = []
     best_loss = 1_000_000.
+    best_model = None
     avg_loss = 0
     percentage_of_correct_memorizations_list = []
     if include_recurrent_layer:
@@ -306,15 +308,17 @@ for dataset_size in dataset_sizes:
         # if best_loss - avg_loss < 10 ** -6 and epoch_number > 50:
           # torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
           # break
+        # Track best performance, and save the model's state
+        if avg_loss < best_loss:
+            best_loss = avg_loss
+            best_model = copy.deepcopy(oneLayerModel)
         if epoch_number > max_epochs:
-          torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}_{}'.format(variance_iterator, epoch_number))
+          torch.save(best_model.state_dict(), model_state_path + '/model_{}_{}'.format(variance_iterator, epoch_number))
           break
         # if percentage_of_correct_memorizations_list[-1][0] == 1:
         #   torch.save(oneLayerModel.state_dict(), model_state_path + '/model_{}'.format(epoch_number))
         #   break
-        # Track best performance, and save the model's state
-        if avg_loss < best_loss:
-            best_loss = avg_loss
+
     
         epoch_number += 1
     if include_recurrent_layer:
@@ -335,9 +339,9 @@ for dataset_size in dataset_sizes:
       if include_recurrent_layer:
         hidden = torch.zeros(1, N, device=my_device)
         for recurrenceIterator in range(number_of_recurrences + 1):
-          y_prediction, hidden = oneLayerModel(inputs, hidden)
+          y_prediction, hidden = best_model(inputs, hidden)
       else:
-        y_prediction = oneLayerModel(inputs)
+        y_prediction = best_model(inputs)
       for j in range(y_prediction.size()[1]):
         if y_prediction[0][j] >= 0.5:
           y_prediction[0][j] = 1
@@ -383,7 +387,7 @@ for dataset_size in dataset_sizes:
   mean_patterns_memorized = dataset_size * mean_accuracy
   np.savetxt(results_path + "/{}maxPatterns_{}meanPatterns_{}accu_{}std_{}varRuns.txt".format(max_patterns, mean_patterns_memorized, mean_accuracy, std_patterns, variance_runs), [12345], fmt='%d')
 
-  for name, param in oneLayerModel.named_parameters():
+  for name, param in best_model.named_parameters():
     # np.savetxt("weights/test.txt", [param], fmt='%d')
     # np.savetxt("weights/{}_{}.txt".format(name, param), [param], fmt='%d')
     if "weight" in name:
