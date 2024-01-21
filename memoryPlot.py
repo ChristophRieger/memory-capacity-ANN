@@ -211,7 +211,7 @@ plt.plot(N_recurrent, [i / j**2 for i, j in zip(number_of_patterns_recurrent, N_
 plt.ylabel("# of memorized patterns / $N^2$", fontsize=12)
 plt.xlabel("N", fontsize=12)
 plt.tick_params(axis='both', labelsize=11)
-plt.savefig("customBceResult" + ".png")
+plt.savefig("customBceRecurrenceResult" + ".png")
 
 
 
