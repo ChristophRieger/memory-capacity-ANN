@@ -18,48 +18,48 @@ variance_iterations = 5
 ############### simple loss ############
 sparsity = 0.1
 
-N = []
-number_of_patterns = []
-mean_of_patterns = []
-std = []
+N_simple = []
+number_of_patterns_simple = []
+mean_of_patterns_simple = []
+std_simple = []
 dataset_size = []
 
-N.append(100)
-number_of_patterns.append(283)
-mean_of_patterns.append(243)
-std.append(23.95)
+N_simple.append(100)
+number_of_patterns_simple.append(283)
+mean_of_patterns_simple.append(243)
+std_simple.append(23.95)
 dataset_size.append(300)
 
-N.append(200)
-number_of_patterns.append(580)
-mean_of_patterns.append(550)
-std.append(32)
+N_simple.append(200)
+number_of_patterns_simple.append(580)
+mean_of_patterns_simple.append(550)
+std_simple.append(32)
 dataset_size.append(600)
 
-N.append(300)
-number_of_patterns.append(897)
-mean_of_patterns.append(883.8)
-std.append(11.95)
+N_simple.append(300)
+number_of_patterns_simple.append(897)
+mean_of_patterns_simple.append(883.8)
+std_simple.append(11.95)
 dataset_size.append(900)
 
-N.append(400)
-number_of_patterns.append(1194)
-mean_of_patterns.append(1165.6)
-std.append(23.56)
+N_simple.append(400)
+number_of_patterns_simple.append(1194)
+mean_of_patterns_simple.append(1165.6)
+std_simple.append(23.56)
 dataset_size.append(1200)
 
-N.append(500)
-number_of_patterns.append(1494)
-mean_of_patterns.append(1486.8)
-std.append(7.93)
+N_simple.append(500)
+number_of_patterns_simple.append(1494)
+mean_of_patterns_simple.append(1486.8)
+std_simple.append(7.93)
 dataset_size.append(1500)
 
 plt.close("all")
 plt.figure(figsize=(10,15))
 plt.subplot(3, 1, 1)
 plt.suptitle("Results with BCE, {} iterations".format(variance_iterations), fontsize=14)
-plt.plot(N, number_of_patterns, marker = 'o', ms = 4, label="maximum memorized patterns")
-plt.errorbar(N, mean_of_patterns, std, linestyle='None', marker = 'x', ms = 4, label="mean memorized patterns with standard deviation")
+plt.plot(N_simple, number_of_patterns_simple, marker = 'o', ms = 4, label="maximum memorized patterns")
+plt.errorbar(N_simple, mean_of_patterns_simple, std_simple, linestyle='None', marker = 'x', ms = 4, label="mean memorized patterns with standard deviation")
 plt.legend(loc="upper left")
 # plt.title("", fontsize=14)
 plt.ylabel("# of memorzized patterns", fontsize=12)
@@ -67,14 +67,14 @@ plt.xlabel("N", fontsize=12)
 plt.tick_params(axis='both', labelsize=11)
 
 plt.subplot(3, 1, 2)
-plt.plot(N, [i / j for i, j in zip(number_of_patterns, N)], marker = 'o', ms = 4)
+plt.plot(N_simple, [i / j for i, j in zip(number_of_patterns_simple, N_simple)], marker = 'o', ms = 4)
 # plt.title("", fontsize=14)
 plt.ylabel("# of memorized patterns / N", fontsize=12)
 plt.xlabel("N", fontsize=12)
 plt.tick_params(axis='both', labelsize=11)
 
 plt.subplot(3, 1, 3)
-plt.plot(N, [i / j**2 for i, j in zip(number_of_patterns, N)], marker = 'o', ms = 4)
+plt.plot(N_simple, [i / j**2 for i, j in zip(number_of_patterns_simple, N_simple)], marker = 'o', ms = 4)
 # plt.title("", fontsize=14)
 plt.ylabel("# of memorized patterns / $N^2$", fontsize=12)
 plt.xlabel("N", fontsize=12)
@@ -86,42 +86,42 @@ plt.savefig("bceResult" + ".png")
 ##### custom loss ###############
 tolerance = 0.1
 sparsity = 0.1
-N = []
-number_of_patterns = []
-mean_of_patterns = []
-std = []
+N_custom_loss = []
+number_of_patterns_custom_loss = []
+mean_of_patterns_custom_loss = []
+std_custom_loss = []
 dataset_size = []
 
-N.append(100)
-number_of_patterns.append(337)
-mean_of_patterns.append(305)
-std.append(24)
+N_custom_loss.append(100)
+number_of_patterns_custom_loss.append(337)
+mean_of_patterns_custom_loss.append(305)
+std_custom_loss.append(24)
 dataset_size.append(350)
 
-N.append(200)
-number_of_patterns.append(694)
-mean_of_patterns.append(674.8)
-std.append(20.7)
+N_custom_loss.append(200)
+number_of_patterns_custom_loss.append(694)
+mean_of_patterns_custom_loss.append(674.8)
+std_custom_loss.append(20.7)
 dataset_size.append(700)
 
-N.append(300)
-number_of_patterns.append(1077)
-mean_of_patterns.append(1046)
-std.append(26.56)
+N_custom_loss.append(300)
+number_of_patterns_custom_loss.append(1077)
+mean_of_patterns_custom_loss.append(1046)
+std_custom_loss.append(26.56)
 dataset_size.append(1100)
 
-N.append(400)
-number_of_patterns.append(1580)
-mean_of_patterns.append(1395.2)
-std.append(169)
+N_custom_loss.append(400)
+number_of_patterns_custom_loss.append(1580)
+mean_of_patterns_custom_loss.append(1395.2)
+std_custom_loss.append(169)
 dataset_size.append(1600)
 # !!! mit viel mehr epochs kann man manchmal noch 100 weiter rauf gehn, aber es wird immer schwueriger
 #  1500/200 auf 1600/600...
 
-N.append(500)
-number_of_patterns.append(2008)
-mean_of_patterns.append(1904)
-std.append(141.7)
+N_custom_loss.append(500)
+number_of_patterns_custom_loss.append(2008)
+mean_of_patterns_custom_loss.append(1904)
+std_custom_loss.append(141.7)
 dataset_size.append(2100)
 # !!! 500 epochs... mby gehn 100 patterns mehr
 #  hab jetzt 700 epochen mit 2100 ds gemacht... besser, aber 100 von 2100 nicht erkannt
@@ -129,8 +129,8 @@ dataset_size.append(2100)
 plt.figure(figsize=(10,15))
 plt.subplot(3, 1, 1)
 plt.suptitle("Results with custom BCE, {} iterations".format(variance_iterations), fontsize=14)
-plt.plot(N, number_of_patterns, marker = 'o', ms = 4, label="maximum memorized patterns")
-plt.errorbar(N, mean_of_patterns, std, linestyle='None', marker = 'x', ms = 4, label="mean memorized patterns with standard deviation")
+plt.plot(N_custom_loss, number_of_patterns_custom_loss, marker = 'o', ms = 4, label="maximum memorized patterns")
+plt.errorbar(N_custom_loss, mean_of_patterns_custom_loss, std_custom_loss, linestyle='None', marker = 'x', ms = 4, label="mean memorized patterns with standard deviation")
 plt.legend(loc="upper left")
 # plt.title("", fontsize=14)
 plt.ylabel("# of memorzized patterns", fontsize=12)
@@ -138,16 +138,116 @@ plt.xlabel("N", fontsize=12)
 plt.tick_params(axis='both', labelsize=11)
 
 plt.subplot(3, 1, 2)
-plt.plot(N, [i / j for i, j in zip(number_of_patterns, N)], marker = 'o', ms = 4)
+plt.plot(N_custom_loss, [i / j for i, j in zip(number_of_patterns_custom_loss, N_custom_loss)], marker = 'o', ms = 4)
 # plt.title("", fontsize=14)
 plt.ylabel("# of memorized patterns / N", fontsize=12)
 plt.xlabel("N", fontsize=12)
 plt.tick_params(axis='both', labelsize=11)
 
 plt.subplot(3, 1, 3)
-plt.plot(N, [i / j**2 for i, j in zip(number_of_patterns, N)], marker = 'o', ms = 4)
+plt.plot(N_custom_loss, [i / j**2 for i, j in zip(number_of_patterns_custom_loss, N_custom_loss)], marker = 'o', ms = 4)
 # plt.title("", fontsize=14)
 plt.ylabel("# of memorized patterns / $N^2$", fontsize=12)
 plt.xlabel("N", fontsize=12)
 plt.tick_params(axis='both', labelsize=11)
 plt.savefig("customBceResult" + ".png")
+
+
+
+
+##### recurrent layer + custom loss ###############
+recurrances = 1
+N_recurrent = []
+number_of_patterns_recurrent = []
+mean_of_patterns_recurrent = []
+std_recurrent = []
+dataset_size = []
+
+N_recurrent.append(50)
+number_of_patterns_recurrent.append(500)
+mean_of_patterns_recurrent.append(500)
+std_recurrent.append(0)
+dataset_size.append(500)
+
+N_recurrent.append(100)
+number_of_patterns_recurrent.append(920)
+mean_of_patterns_recurrent.append(902.2)
+std_recurrent.append(12.5)
+dataset_size.append(1000)
+
+N_recurrent.append(150)
+number_of_patterns_recurrent.append(1241)
+mean_of_patterns_recurrent.append(1228)
+std_recurrent.append(9.27)
+dataset_size.append(1300)
+
+N_recurrent.append(200)
+number_of_patterns_recurrent.append(1725)
+mean_of_patterns_recurrent.append(1686.67)
+std_recurrent.append(37.93)
+dataset_size.append(2000)
+
+plt.figure(figsize=(10,15))
+plt.subplot(3, 1, 1)
+plt.suptitle("Results with {} recurrance, custom BCE, {} iterations".format(recurrances, variance_iterations), fontsize=14)
+plt.plot(N_recurrent, number_of_patterns_recurrent, marker = 'o', ms = 4, label="maximum memorized patterns")
+plt.errorbar(N_recurrent, mean_of_patterns_recurrent, std_recurrent, linestyle='None', marker = 'x', ms = 4, label="mean memorized patterns with standard deviation")
+plt.legend(loc="upper left")
+# plt.title("", fontsize=14)
+plt.ylabel("# of memorzized patterns", fontsize=12)
+plt.xlabel("N", fontsize=12)
+plt.tick_params(axis='both', labelsize=11)
+
+plt.subplot(3, 1, 2)
+plt.plot(N_recurrent, [i / j for i, j in zip(number_of_patterns_recurrent, N_recurrent)], marker = 'o', ms = 4)
+# plt.title("", fontsize=14)
+plt.ylabel("# of memorized patterns / N", fontsize=12)
+plt.xlabel("N", fontsize=12)
+plt.tick_params(axis='both', labelsize=11)
+
+plt.subplot(3, 1, 3)
+plt.plot(N_recurrent, [i / j**2 for i, j in zip(number_of_patterns_recurrent, N_recurrent)], marker = 'o', ms = 4)
+# plt.title("", fontsize=14)
+plt.ylabel("# of memorized patterns / $N^2$", fontsize=12)
+plt.xlabel("N", fontsize=12)
+plt.tick_params(axis='both', labelsize=11)
+plt.savefig("customBceResult" + ".png")
+
+
+
+# combined plot
+plt.figure(figsize=(10,15))
+plt.plot(N_simple, number_of_patterns_simple, marker = 'o', ms = 4, label="simple", color='blue')
+plt.errorbar(N_simple, mean_of_patterns_simple, std_simple, linestyle='None', marker = 'x', ms = 4, color='blue')
+plt.plot(N_custom_loss, number_of_patterns_custom_loss, marker = 'o', ms = 4, label="custom loss", color='green')
+plt.errorbar(N_custom_loss, mean_of_patterns_custom_loss, std_custom_loss, linestyle='None', marker = 'x', ms = 4, color='green')
+plt.plot(N_recurrent, number_of_patterns_recurrent, marker = 'o', ms = 4, label="custom loss + recurrent layer", color='red')
+plt.errorbar(N_recurrent, mean_of_patterns_recurrent, std_recurrent, linestyle='None', marker = 'x', ms = 4, color='red')
+plt.legend(loc="upper left")
+plt.title("Memorized patterns", fontsize=14)
+plt.ylabel("# of memorzized patterns", fontsize=12)
+plt.xlabel("N", fontsize=12)
+plt.tick_params(axis='both', labelsize=11)
+plt.savefig("combinedMemorizedPatterns" + ".png")
+
+plt.figure(figsize=(10,15))
+plt.plot(N_simple, [i / j for i, j in zip(number_of_patterns_simple, N_simple)], marker = 'o', ms = 4, label='simple', color='blue')
+plt.plot(N_custom_loss, [i / j for i, j in zip(number_of_patterns_custom_loss, N_custom_loss)], marker = 'o', ms = 4, label='custom loss', color='green')
+plt.plot(N_recurrent, [i / j for i, j in zip(number_of_patterns_recurrent, N_recurrent)], marker = 'o', ms = 4, label='custom loss + recurrent layer', color='red')
+plt.title("Memorized patterns per input neuron", fontsize=14)
+plt.legend(loc="upper left")
+plt.ylabel("# of memorized patterns / N", fontsize=12)
+plt.xlabel("N", fontsize=12)
+plt.tick_params(axis='both', labelsize=11)
+plt.savefig("combindedPatternPerN" + ".png")
+
+plt.figure(figsize=(10,15))
+plt.plot(N_simple, [i / j**2 for i, j in zip(number_of_patterns_simple, N_simple)], marker = 'o', ms = 4, label='simple', color='blue')
+plt.plot(N_custom_loss, [i / j**2 for i, j in zip(number_of_patterns_custom_loss, N_custom_loss)], marker = 'o', ms = 4, label='custom loss', color='green')
+plt.plot(N_recurrent, [i / j**2 for i, j in zip(number_of_patterns_recurrent, N_recurrent)], marker = 'o', ms = 4, label='custom loss + recurrent layer', color='red')
+plt.title("Memorized patterns per input neuron squared", fontsize=14)
+plt.legend(loc="upper left")
+plt.ylabel("# of memorized patterns / $N^2$", fontsize=12)
+plt.xlabel("N", fontsize=12)
+plt.tick_params(axis='both', labelsize=11)
+plt.savefig("combindedPatternPerN2" + ".png")
