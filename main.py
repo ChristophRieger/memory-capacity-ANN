@@ -22,19 +22,23 @@ plt.close("all")
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 # Command center
-use_custom_loss = True
+use_custom_loss = False
 N = 100
 dataset_sizes = [1000, 1500, 2000]
 
 max_epochs = 300
-load_model = False
-include_recurrent_layer = True
+load_model = True
+include_recurrent_layer = False
 number_of_recurrences = 1
 
 if use_custom_loss:
   use_custom_loss_str = "Y"
 else:
   use_custom_loss_str = "N"
+if include_recurrent_layer:
+  include_recurrent_layer_str = "Y"
+else:
+  include_recurrent_layer_str = "N"
 # parameters
 variance_runs = 5
 sparsity = 0.1 # fraction of active bits in data
@@ -228,19 +232,23 @@ for dataset_size in dataset_sizes:
 
     
     if load_model:
-      oneLayerModel.load_state_dict(torch.load('modelStatesRecurrent\customY_N100_s0.1_dS450_lr0.01_bS1_20240114_193658\model_0_501'))
+      # oneLayerModel.load_state_dict(torch.load('modelStatesRecurrent\customY_N100_s0.1_dS1000_lr0.01_bS1_20240119_171246\model_0_301'))
+      # oneLayerModel.load_state_dict(torch.load('modelStates\customY_N100_s0.1_dS350_lr0.01_bS1_20231218_155706\model_501'))
+      oneLayerModel.load_state_dict(torch.load('modelStates\customN_N100_s0.1_dS300_lr0.01_bS1_20231218_155704\model_501'))
       if not os.path.exists('weights'):
         os.mkdir('weights')
       for name, param in oneLayerModel.named_parameters():
         # print(name)
         # print(param)
-        # np.savetxt("weights/test.txt", [param], fmt='%d')
-        # np.savetxt("weights/{}_{}.txt".format(name, param), [param], fmt='%d')
-        plt.figure()
-        plt.title(name)
-        plt.imshow(param.cpu().detach().numpy(), cmap='viridis')
-        plt.colorbar()
-        plt.show()
+        if "weight" in name:
+          plt.figure()
+          plt.title(name)
+          plt.imshow(param.cpu().detach().numpy(), cmap='viridis')
+          plt.colorbar()
+          plt.show()  
+          plt.savefig("weights/fullyConnected_{}_N{}_CL{}_R{}.txt".format(name, N, use_custom_loss_str, include_recurrent_layer_str) + ".png", dpi=600)
+        else:
+          np.savetxt("weights/bias_{}_N{}_CL{}_R{}.txt".format(name, N, use_custom_loss_str, include_recurrent_layer_str), [param.cpu().detach().numpy()], fmt='%d')
       sys.exit("quit to inspect weights")
     
     # Optimizers specified in the torch.optim package
