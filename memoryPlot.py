@@ -164,10 +164,10 @@ std_recurrent = []
 dataset_size = []
 
 N_recurrent.append(50)
-number_of_patterns_recurrent.append(500)
-mean_of_patterns_recurrent.append(500)
-std_recurrent.append(0)
-dataset_size.append(500)
+number_of_patterns_recurrent.append(534)
+mean_of_patterns_recurrent.append(524.8)
+std_recurrent.append(6.18)
+dataset_size.append(550)
 
 N_recurrent.append(100)
 number_of_patterns_recurrent.append(920)
