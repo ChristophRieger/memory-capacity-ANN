@@ -223,29 +223,52 @@ mean_of_patterns_recurrent_2 = []
 std_recurrent_2 = []
 dataset_size = []
 
+# too few epochs, rerunning, DS700 did not work anymore, now DS600 with more epochs
 N_recurrent_2.append(50)
-number_of_patterns_recurrent_2.append(545)
-mean_of_patterns_recurrent_2.append(532.33)
-std_recurrent_2.append(8.99)
+# number_of_patterns_recurrent_2.append(567)
+number_of_patterns_recurrent_2.append(600)
+
+mean_of_patterns_recurrent_2.append(555)
+std_recurrent_2.append(11.78)
 dataset_size.append(600)
 
+# 
+# N_recurrent_2.append(100)
+# number_of_patterns_recurrent_2.append(1179)
+# mean_of_patterns_recurrent_2.append(1177.33)
+# std_recurrent_2.append(1.25)
+# dataset_size.append(1200)
+# 
 N_recurrent_2.append(100)
-number_of_patterns_recurrent_2.append(1100)
-mean_of_patterns_recurrent_2.append(1100)
-std_recurrent_2.append(0)
-dataset_size.append(1100)
-
-N_recurrent_2.append(150)
-number_of_patterns_recurrent_2.append(1400)
-mean_of_patterns_recurrent_2.append(1300)
-std_recurrent_2.append(0)
+number_of_patterns_recurrent_2.append(1219)
+mean_of_patterns_recurrent_2.append(1199)
+std_recurrent_2.append(14.51)
 dataset_size.append(1300)
 
-N_recurrent_2.append(200)
-number_of_patterns_recurrent_2.append(0)
-mean_of_patterns_recurrent_2.append(0)
-std_recurrent_2.append(0)
+# running
+# N_recurrent_2.append(150)
+# number_of_patterns_recurrent_2.append(1472)
+# mean_of_patterns_recurrent_2.append(1463.67)
+# std_recurrent_2.append(7.93)
+# dataset_size.append(1500)
+# 
+N_recurrent_2.append(150)
+number_of_patterns_recurrent_2.append(1528)
+mean_of_patterns_recurrent_2.append(1503)
+std_recurrent_2.append(17.72)
 dataset_size.append(1600)
+
+# running
+# N_recurrent_2.append(200)
+# number_of_patterns_recurrent_2.append(1673)
+# mean_of_patterns_recurrent_2.append(0)
+# std_recurrent_2.append(0)
+# dataset_size.append(1700)
+N_recurrent_2.append(200)
+number_of_patterns_recurrent_2.append(1950)
+mean_of_patterns_recurrent_2.append(1929.33)
+std_recurrent_2.append(14.7)
+dataset_size.append(2100)
 
 
 # combined plot
