@@ -223,13 +223,10 @@ mean_of_patterns_recurrent_2 = []
 std_recurrent_2 = []
 dataset_size = []
 
-# too few epochs, rerunning, DS700 did not work anymore, now DS600 with more epochs
 N_recurrent_2.append(50)
-# number_of_patterns_recurrent_2.append(567)
-number_of_patterns_recurrent_2.append(600)
-
-mean_of_patterns_recurrent_2.append(555)
-std_recurrent_2.append(11.78)
+number_of_patterns_recurrent_2.append(589)
+mean_of_patterns_recurrent_2.append(577.66)
+std_recurrent_2.append(13.3)
 dataset_size.append(600)
 
 # 
@@ -245,7 +242,6 @@ mean_of_patterns_recurrent_2.append(1199)
 std_recurrent_2.append(14.51)
 dataset_size.append(1300)
 
-# running
 # N_recurrent_2.append(150)
 # number_of_patterns_recurrent_2.append(1472)
 # mean_of_patterns_recurrent_2.append(1463.67)
@@ -258,7 +254,6 @@ mean_of_patterns_recurrent_2.append(1503)
 std_recurrent_2.append(17.72)
 dataset_size.append(1600)
 
-# running
 # N_recurrent_2.append(200)
 # number_of_patterns_recurrent_2.append(1673)
 # mean_of_patterns_recurrent_2.append(0)
@@ -277,15 +272,15 @@ plt.plot(N_simple, number_of_patterns_simple, marker = 'o', ms = 4, label="simpl
 plt.errorbar(N_simple, mean_of_patterns_simple, std_simple, linestyle='None', marker = 'x', ms = 4, color='blue')
 plt.plot(N_custom_loss, number_of_patterns_custom_loss, marker = 'o', ms = 4, label="simple + custom loss", color='green')
 plt.errorbar(N_custom_loss, mean_of_patterns_custom_loss, std_custom_loss, linestyle='None', marker = 'x', ms = 4, color='green')
-plt.plot(N_recurrent, number_of_patterns_recurrent, marker = 'o', ms = 4, label="recurrent layer (2 steps) + custom loss + ", color='red')
+plt.plot(N_recurrent, number_of_patterns_recurrent, marker = 'o', ms = 4, label="recurrent layer (2 steps) + custom loss", color='red')
 plt.errorbar(N_recurrent, mean_of_patterns_recurrent, std_recurrent, linestyle='None', marker = 'x', ms = 4, color='red')
 plt.plot(N_recurrent_2, number_of_patterns_recurrent_2, marker = 'o', ms = 4, label="recurrent layer (3 steps) + custom loss", color='black')
 plt.errorbar(N_recurrent_2, mean_of_patterns_recurrent_2, std_recurrent_2, linestyle='None', marker = 'x', ms = 4, color='black')
-plt.legend(loc="upper left")
 plt.title("Memorized patterns", fontsize=14)
-plt.ylabel("# of memorzized patterns", fontsize=12)
-plt.xlabel("N", fontsize=12)
-plt.tick_params(axis='both', labelsize=11)
+plt.legend(loc="lower right", fontsize=12)
+plt.ylabel("# of memorzized patterns", fontsize=13)
+plt.xlabel("N", fontsize=13)
+plt.tick_params(axis='both', labelsize=12)
 plt.savefig("combinedMemorizedPatterns" + ".png")
 
 plt.figure(figsize=(10,15))
@@ -294,10 +289,10 @@ plt.plot(N_custom_loss, [i / j for i, j in zip(number_of_patterns_custom_loss, N
 plt.plot(N_recurrent, [i / j for i, j in zip(number_of_patterns_recurrent, N_recurrent)], marker = 'o', ms = 4, label='recurrent layer (2 steps) + custom loss', color='red')
 plt.plot(N_recurrent_2, [i / j for i, j in zip(number_of_patterns_recurrent_2, N_recurrent_2)], marker = 'o', ms = 4, label='recurrent layer (3 steps) + custom loss', color='black')
 plt.title("Memorized patterns per input neuron", fontsize=14)
-plt.legend(loc="upper left")
-plt.ylabel("# of memorized patterns / N", fontsize=12)
-plt.xlabel("N", fontsize=12)
-plt.tick_params(axis='both', labelsize=11)
+plt.legend(loc="upper right", fontsize=12)
+plt.ylabel("# of memorized patterns / N", fontsize=13)
+plt.xlabel("N", fontsize=13)
+plt.tick_params(axis='both', labelsize=12)
 plt.savefig("combindedPatternPerN" + ".png")
 
 plt.figure(figsize=(10,15))
@@ -306,8 +301,8 @@ plt.plot(N_custom_loss, [i / j**2 for i, j in zip(number_of_patterns_custom_loss
 plt.plot(N_recurrent, [i / j**2 for i, j in zip(number_of_patterns_recurrent, N_recurrent)], marker = 'o', ms = 4, label='recurrent layer (2 steps) + custom loss', color='red')
 plt.plot(N_recurrent_2, [i / j**2 for i, j in zip(number_of_patterns_recurrent_2, N_recurrent_2)], marker = 'o', ms = 4, label='recurrent layer (3 steps) + custom loss', color='black')
 plt.title("Memorized patterns per input neuron squared", fontsize=14)
-plt.legend(loc="upper left")
-plt.ylabel("# of memorized patterns / $N^2$", fontsize=12)
-plt.xlabel("N", fontsize=12)
-plt.tick_params(axis='both', labelsize=11)
+plt.legend(loc="upper right", fontsize=12)
+plt.ylabel("# of memorized patterns / $N^2$", fontsize=13)
+plt.xlabel("N", fontsize=13)
+plt.tick_params(axis='both', labelsize=12)
 plt.savefig("combindedPatternPerN2" + ".png")
