@@ -22,13 +22,13 @@ plt.close("all")
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
 # Command center
-use_custom_loss = False
+use_custom_loss = True
 N = 100
 dataset_sizes = [1000, 1500, 2000]
 
 max_epochs = 300
-load_model = True
-include_recurrent_layer = False
+load_model = False
+include_recurrent_layer = True
 number_of_recurrences = 1
 
 if use_custom_loss:
@@ -229,8 +229,11 @@ for dataset_size in dataset_sizes:
     train_loader = DataLoader(dataset=dataset_train, batch_size=my_batch_size, shuffle=True)
     oneLayerModel = OneLayerModel(N, N, my_device, include_recurrent_layer)
     
+    model_parameters = filter(lambda p: p.requires_grad, oneLayerModel.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    print(params)
+    sys.exit("quit to inspect weights")
 
-    
     if load_model:
       # oneLayerModel.load_state_dict(torch.load('modelStatesRecurrent\customY_N100_s0.1_dS1000_lr0.01_bS1_20240119_171246\model_0_301'))
       # oneLayerModel.load_state_dict(torch.load('modelStates\customY_N100_s0.1_dS350_lr0.01_bS1_20231218_155706\model_501'))
